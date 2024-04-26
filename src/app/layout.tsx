@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
 import { Roboto } from 'next/font/google';
+import ModalRenderer from '@/app/components/modal-renderer';
 
 const roboto = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -20,6 +21,8 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body>
         <AppRouterCacheProvider>
           {children}
+
+          <ModalRenderer />
         </AppRouterCacheProvider>
       </body>
     </html>
