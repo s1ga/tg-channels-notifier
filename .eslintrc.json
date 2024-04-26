@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "airbnb-base"
+  ],
+  "rules": {
+    "object-curly-newline": "off",
+    "lines-between-class-members": "off",
+    "import/extensions": "off",
+    "no-use-before-define": "off",
+    "no-shadow": "off",
+    "no-underscore-dangle": "off",
+    "no-undef": "off",
+    "max-len": [
+      "error",
+      {
+        "code": 110
+      }
+    ],
+    "no-console": "off",
+    "no-case-declarations": "off"
+  }
+}
