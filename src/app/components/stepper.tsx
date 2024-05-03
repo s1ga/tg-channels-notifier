@@ -1,4 +1,4 @@
-import { StepperProps } from '@/app/interfaces/stepper';
+import { StepperProps } from '@/app/interfaces/stepper-props';
 import { Button, MobileStepper } from '@mui/material';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
