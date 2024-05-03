@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   description: 'Create Telegram notifier bot',
 };
 
+// TODO: create error state with toaster and loader
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <StoreProvider>
