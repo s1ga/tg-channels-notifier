@@ -1,8 +1,8 @@
 import Stepper from '@/app/components/stepper';
 import { registerSteps, registerStepsModals } from '@/app/constants/register-steps';
 import RegisterSteps from '@/app/enums/register-steps';
+import { ModalStep } from '@/app/interfaces/modal-step';
 import { RegisterModalProps } from '@/app/interfaces/register-modal-props';
-import { RegisterStep } from '@/app/interfaces/register-step';
 import promisify from '@/app/utils/promisify';
 import { selectClient, setError, updateApi, updateSession } from '@/store/features/client/client-slice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -10,7 +10,7 @@ import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { FormEvent, useMemo, useRef, useState } from 'react';
 
 export default function RegisterModal({ onClose }: RegisterModalProps) {
-  const [step, setStep] = useState<RegisterStep['id']>(registerSteps[0].id);
+  const [step, setStep] = useState<ModalStep<RegisterSteps>['id']>(registerSteps[0].id);
   const telegramData = useRef<{ phone: string, password: string } | null>(null);
   const currentTask = useRef<CallableFunction | null>(null);
   const dispatch = useAppDispatch();

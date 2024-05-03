@@ -1,9 +1,9 @@
 import RegisterSteps from '@/app/enums/register-steps';
-import { RegisterStep } from '@/app/interfaces/register-step';
+import { ModalStep } from '@/app/interfaces/modal-step';
 import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
 
-export const registerSteps: RegisterStep[] = [
+export const registerSteps: ModalStep<RegisterSteps>[] = [
   {
     id: RegisterSteps.Application,
     name: 'Create Telegram application',
