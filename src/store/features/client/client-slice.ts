@@ -1,9 +1,8 @@
 import storageKeys from '@/app/constants/storage-keys';
 import LocalStorageService from '@/app/services/storage.service';
+import createAppSlice from '@/store/create-app-slice';
 import {
-  asyncThunkCreator, buildCreateSlice, createListenerMiddleware, isAnyOf, ListenerEffectAPI, PayloadAction,
-  ThunkDispatch,
-  UnknownAction,
+  createListenerMiddleware, isAnyOf, ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction,
 } from '@reduxjs/toolkit';
 import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
@@ -34,10 +33,7 @@ const initialState: ClientSliceState = {
   error: '',
 };
 
-const appSlice = buildCreateSlice({
-  creators: { asyncThunk: asyncThunkCreator },
-});
-export const clientSlice = appSlice({
+export const clientSlice = createAppSlice({
   name: 'client',
   initialState,
   reducers: (create) => ({
@@ -122,7 +118,7 @@ const clientConnect = async (
 
     listenerApi.dispatch(setIsAuth(isAuth));
   } catch (err: any) {
-    console.log('error', err?.message);
+    listenerApi.dispatch(setError(err?.message));
   } finally {
     listenerApi.dispatch(setLoading(false));
   }

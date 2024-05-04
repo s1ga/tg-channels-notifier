@@ -16,6 +16,7 @@ export default function RegisterModal({ onClose }: RegisterModalProps) {
   const dispatch = useAppDispatch();
   const client = useAppSelector(selectClient);
 
+  // TODO: check for different errors
   const handleForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
