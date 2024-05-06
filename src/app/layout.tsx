@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: 'Create Telegram notifier bot',
 };
 
-// TODO: create loader
+// TODO: create loader and UI
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <StoreProvider>

@@ -3,7 +3,7 @@ import Folders from '@/app/components/folders';
 import Tabs from '@/app/components/tabs';
 import { Tab } from '@/app/interfaces/tab';
 import {
-  getChannels, selectChannelsState, selectFoldersChannels, toggleSelected,
+  getChannels, resetChannels, selectChannelsState, selectFoldersChannels, toggleSelected,
 } from '@/store/features/channels/channels-slice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useCallback, useEffect } from 'react';
@@ -50,6 +50,10 @@ export default function OverviewStep2Modal() {
 
   useEffect(() => {
     dispatch(getChannels());
+
+    return () => {
+      dispatch(resetChannels());
+    };
   }, [dispatch]);
 
   return <Tabs tabList={tabs} />;

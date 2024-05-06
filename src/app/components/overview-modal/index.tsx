@@ -3,11 +3,11 @@ import { overviewSteps, overviewStepsModals } from '@/app/constants/overview-ste
 import OverviewSteps from '@/app/enums/overview-steps';
 import { ModalStep } from '@/app/interfaces/modal-step';
 import { OverviewModalProps } from '@/app/interfaces/overview-modal-props';
-import { resetChannels, selectSelectedChannels } from '@/store/features/channels/channels-slice';
+import { selectSelectedChannels } from '@/store/features/channels/channels-slice';
 import { selectIsAuth, setError } from '@/store/features/client/client-slice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 
 export default function OverviewModal({ onClose }: OverviewModalProps) {
   const [step, setStep] = useState<ModalStep<OverviewSteps>['id']>(overviewSteps[0].id);
@@ -42,15 +42,10 @@ export default function OverviewModal({ onClose }: OverviewModalProps) {
     }
   };
 
-  const closeModal = useCallback(() => {
-    dispatch(resetChannels());
-    onClose();
-  }, [dispatch, onClose]);
-
   const handleNext = () => {
     currentTask.current = () => {
       if (step === overviewSteps.length - 1) {
-        closeModal();
+        onClose();
         return;
       }
 
@@ -60,7 +55,7 @@ export default function OverviewModal({ onClose }: OverviewModalProps) {
 
   const handleBack = () => {
     if (step === 0) {
-      closeModal();
+      onClose();
       return;
     }
     setStep((state: number) => state - 1);
@@ -69,15 +64,15 @@ export default function OverviewModal({ onClose }: OverviewModalProps) {
   const CurrentComponent = useMemo(() => overviewStepsModals[step], [step]);
 
   useEffect(() => {
-    if (!isAuth) closeModal();
-  }, [isAuth, closeModal]);
+    if (!isAuth) onClose();
+  }, [isAuth, onClose]);
 
   return (
     <Dialog
       fullWidth
       maxWidth="md"
       open={true}
-      onClose={closeModal}
+      onClose={onClose}
     >
       <DialogTitle>{overviewSteps[step].name}</DialogTitle>
       <DialogContent>

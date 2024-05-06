@@ -6,7 +6,7 @@ import createAppSlice from '@/store/create-app-slice';
 import {
   createListenerMiddleware, isAnyOf, ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction,
 } from '@reduxjs/toolkit';
-import { TelegramClient } from 'telegram';
+import { Api, TelegramClient } from 'telegram';
 import { RPCError } from 'telegram/errors';
 import { StringSession } from 'telegram/sessions';
 
@@ -69,7 +69,8 @@ export const clientSlice = createAppSlice({
         client: action.payload,
       };
     }),
-    resetClient: create.reducer((state) => ({
+    // eslint-disable-next-line no-unused-vars
+    resetClient: create.reducer((state, action: PayloadAction<boolean>) => ({
       ...state,
       client: getClient(true),
     })),
@@ -130,11 +131,15 @@ const clientConnect = async (
   }
 };
 const clientDisconnect = async (
-  _: unknown,
   listenerApi: ListenerEffectAPI<unknown, ThunkDispatch<unknown, unknown, UnknownAction>, unknown>,
+  toForceDelete: boolean = false,
 ) => {
   const originalState = listenerApi.getOriginalState() as any;
-  await (originalState.client as ClientSliceState).client.disconnect();
+  if (toForceDelete) {
+    await (originalState.client as ClientSliceState).client.invoke(
+      new Api.auth.LogOut(),
+    );
+  } else await (originalState.client as ClientSliceState).client.disconnect();
 };
 listenerMiddleware.startListening({
   matcher: isAnyOf(updateApi, updateClient),
@@ -142,7 +147,7 @@ listenerMiddleware.startListening({
     const { id, hash } = action.payload as ApiPayload;
     LocalStorageService.set<string>(storageKeys.ApiHash, hash);
     LocalStorageService.set<number>(storageKeys.ApiId, id);
-    await clientDisconnect(action, listenerApi);
+    await clientDisconnect(listenerApi, false);
     await clientConnect(action, listenerApi);
   },
 });
@@ -150,7 +155,7 @@ listenerMiddleware.startListening({
   actionCreator: updateSession,
   effect: async (action, listenerApi) => {
     LocalStorageService.set<string>(storageKeys.SessionId, action.payload as string);
-    await clientDisconnect(action, listenerApi);
+    await clientDisconnect(listenerApi, false);
     await clientConnect(action, listenerApi);
   },
 });
@@ -160,7 +165,7 @@ listenerMiddleware.startListening({
     LocalStorageService.delete(storageKeys.ApiHash);
     LocalStorageService.delete(storageKeys.ApiId);
     LocalStorageService.delete(storageKeys.SessionId);
-    await clientDisconnect(action, listenerApi);
+    await clientDisconnect(listenerApi, action.payload);
     await clientConnect(action, listenerApi);
   },
 });
@@ -178,7 +183,7 @@ listenerMiddleware.startListening({
     ToastService.error(msg || 'An error has occured!', { toastId: 'error-toast' });
 
     if (action.payload instanceof RPCError && action.payload.code === 401) {
-      listenerApi.dispatch(resetClient());
+      listenerApi.dispatch(resetClient(false));
     }
   },
 });

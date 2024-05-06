@@ -12,6 +12,7 @@ export default function Home() {
   const displayRegisterModal = useRegisterModal();
   const displayOverviewModal = useOverviewModal();
   const displayLogoutModal = useLogoutModal();
+  const displayForceLogoutModal = useLogoutModal(true);
 
   const isAuth = useAppSelector(selectIsAuth);
   const dispatch = useAppDispatch();
@@ -26,6 +27,7 @@ export default function Home() {
         && <>
           <Button onClick={displayOverviewModal} variant="outlined">Create notifier</Button>
           <Button onClick={displayLogoutModal} variant="outlined">Logout</Button>
+          <Button onClick={displayForceLogoutModal} variant="outlined">Force logout</Button>
         </>
       }
       {!isAuth
