@@ -144,7 +144,7 @@ channelsListenerMiddleware.startListening({
 
       listenerApi.dispatch(setChannels({ channels, folders, images }));
     } catch (err: any) {
-      listenerApi.dispatch(setError(err?.message));
+      listenerApi.dispatch(setError(err as Error));
     } finally {
       listenerApi.dispatch(setLoading(false));
     }

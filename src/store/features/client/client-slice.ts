@@ -1,11 +1,13 @@
 import { initialApiHash, initialApiId, initialTelegramClient } from '@/app/constants/initial-client';
 import storageKeys from '@/app/constants/storage-keys';
 import LocalStorageService from '@/app/services/storage.service';
+import ToastService from '@/app/services/toast.service';
 import createAppSlice from '@/store/create-app-slice';
 import {
   createListenerMiddleware, isAnyOf, ListenerEffectAPI, PayloadAction, ThunkDispatch, UnknownAction,
 } from '@reduxjs/toolkit';
 import { TelegramClient } from 'telegram';
+import { RPCError } from 'telegram/errors';
 import { StringSession } from 'telegram/sessions';
 
 export interface ClientSliceState {
@@ -75,9 +77,9 @@ export const clientSlice = createAppSlice({
       ...state,
       isAuth: action.payload,
     })),
-    setError: create.reducer((state, action: PayloadAction<string>) => ({
+    setError: create.reducer((state, action: PayloadAction<Error | RPCError | string>) => ({
       ...state,
-      error: action.payload,
+      error: typeof action.payload === 'string' ? action.payload : action.payload.message,
     })),
     clearError: create.reducer((state) => ({
       ...state,
@@ -122,7 +124,7 @@ const clientConnect = async (
 
     listenerApi.dispatch(setIsAuth(isAuth));
   } catch (err: any) {
-    listenerApi.dispatch(setError(err?.message));
+    listenerApi.dispatch(setError(err as Error));
   } finally {
     listenerApi.dispatch(setLoading(false));
   }
@@ -165,4 +167,18 @@ listenerMiddleware.startListening({
 listenerMiddleware.startListening({
   actionCreator: init,
   effect: clientConnect,
+});
+listenerMiddleware.startListening({
+  actionCreator: setError,
+  effect: (action, listenerApi) => {
+    console.dir(action.payload);
+    const msg = typeof action.payload === 'string'
+      ? action.payload
+      : action.payload.message;
+    ToastService.error(msg || 'An error has occured!', { toastId: 'error-toast' });
+
+    if (action.payload instanceof RPCError && action.payload.code === 401) {
+      listenerApi.dispatch(resetClient());
+    }
+  },
 });

@@ -4,16 +4,17 @@ import OverviewSteps from '@/app/enums/overview-steps';
 import { ModalStep } from '@/app/interfaces/modal-step';
 import { OverviewModalProps } from '@/app/interfaces/overview-modal-props';
 import { resetChannels, selectSelectedChannels } from '@/store/features/channels/channels-slice';
-import { setError } from '@/store/features/client/client-slice';
+import { selectIsAuth, setError } from '@/store/features/client/client-slice';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
-import { FormEvent, useMemo, useRef, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export default function OverviewModal({ onClose }: OverviewModalProps) {
   const [step, setStep] = useState<ModalStep<OverviewSteps>['id']>(overviewSteps[0].id);
   const botNameRef = useRef<string>('');
   const currentTask = useRef<CallableFunction | null>(null);
   const selectedChannels = useAppSelector(selectSelectedChannels);
+  const isAuth = useAppSelector(selectIsAuth);
   const dispatch = useAppDispatch();
 
   const handleForm = (event: FormEvent<HTMLFormElement>) => {
@@ -41,10 +42,10 @@ export default function OverviewModal({ onClose }: OverviewModalProps) {
     }
   };
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     dispatch(resetChannels());
     onClose();
-  };
+  }, [dispatch, onClose]);
 
   const handleNext = () => {
     currentTask.current = () => {
@@ -66,6 +67,10 @@ export default function OverviewModal({ onClose }: OverviewModalProps) {
   };
 
   const CurrentComponent = useMemo(() => overviewStepsModals[step], [step]);
+
+  useEffect(() => {
+    if (!isAuth) closeModal();
+  }, [isAuth, closeModal]);
 
   return (
     <Dialog

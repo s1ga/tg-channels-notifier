@@ -6,7 +6,13 @@ export default function RegisterStep3Modal() {
       <List
         sx={{ width: '100%', bgcolor: 'background.paper', listStyle: 'decimal', paddingTop: 0 }}
       >
-        <Typography variant="body1">You need to fill your Telegram phone number and 2FA password:</Typography>
+        <Typography variant="body1" sx={{ fontWeight: 'bold', mb: 1 }}>
+          Note: Be precise with the entered data because any incorrect flood may block
+          the ability to connect your account!
+        </Typography>
+        <Typography variant="body1">
+          You need to fill your Telegram phone number and 2FA password.
+        </Typography>
         <ListItem
           key="telegram-number"
           sx={{ display: 'list-item', padding: 0, paddingTop: 0.5, marginLeft: 2 }}

@@ -8,6 +8,7 @@ import { selectClient, setError, updateApi, updateSession } from '@/store/featur
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { FormEvent, useMemo, useRef, useState } from 'react';
+import { RPCError } from 'telegram/errors';
 
 export default function RegisterModal({ onClose }: RegisterModalProps) {
   const [step, setStep] = useState<ModalStep<RegisterSteps>['id']>(registerSteps[0].id);
@@ -16,7 +17,6 @@ export default function RegisterModal({ onClose }: RegisterModalProps) {
   const dispatch = useAppDispatch();
   const client = useAppSelector(selectClient);
 
-  // TODO: check for different errors
   const handleForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -60,8 +60,16 @@ export default function RegisterModal({ onClose }: RegisterModalProps) {
     setStep((state: number) => state - 1);
   };
 
+  const handleError = (err: Error) => {
+    dispatch(setError(err));
+    currentTask.current = null;
+  };
+
   const handlePassword = () => new Promise<string>((res, rej) => {
-    if (!telegramData.current?.password) rej(new Error('You had to enter 2FA password'));
+    if (!telegramData.current?.password) {
+      rej(new Error('You had to enter 2FA password'));
+      handleBack();
+    }
     res(telegramData.current!.password);
   });
 
@@ -72,29 +80,40 @@ export default function RegisterModal({ onClose }: RegisterModalProps) {
   };
 
   const submitTelegramData = async (formData: FormData) => {
-    const phone = formData.get('phone')?.toString() || '';
-    const password = formData.get('password')?.toString() || '';
-    telegramData.current = { phone, password };
+    try {
+      const phone = formData.get('phone')?.toString() || '';
+      const password = formData.get('password')?.toString() || '';
+      telegramData.current = { phone, password };
 
-    const { apiHash, apiId } = client;
-    await client.sendCode(
-      { apiHash, apiId },
-      phone,
-    );
+      const { apiHash, apiId } = client;
+      await client.sendCode(
+        { apiHash, apiId },
+        phone,
+      );
+    } catch (err: any) {
+      handleError(err);
+      handleBack();
+    }
   };
 
   const submitCode = async (formData: FormData) => {
-    const code = formData.get('code')?.toString() || '';
-    await client.start({
-      phoneNumber: telegramData.current!.phone,
-      phoneCode: () => promisify(code),
-      password: handlePassword,
-      onError: (err: Error) => {
-        dispatch(setError(err.message));
-      },
-    });
-    const session = client.session.save() as unknown as string;
-    dispatch(updateSession(session));
+    try {
+      const code = formData.get('code')?.toString() || '';
+      await client.start({
+        phoneNumber: telegramData.current!.phone,
+        phoneCode: () => promisify(code),
+        password: handlePassword,
+        onError: (err: Error) => {
+          dispatch(setError(err));
+          if ((err as RPCError).errorMessage === 'PASSWORD_HASH_INVALID') handleBack();
+          return promisify(true);
+        },
+      });
+      const session = client.session.save() as unknown as string;
+      dispatch(updateSession(session));
+    } catch (err: any) {
+      handleError(err);
+    }
   };
 
   const CurrentComponent = useMemo(() => registerStepsModals[step], [step]);
