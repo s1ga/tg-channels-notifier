@@ -1,3 +1,4 @@
+import { initialApiHash, initialApiId, initialTelegramClient } from '@/app/constants/initial-client';
 import storageKeys from '@/app/constants/storage-keys';
 import LocalStorageService from '@/app/services/storage.service';
 import createAppSlice from '@/store/create-app-slice';
@@ -19,11 +20,14 @@ interface ApiPayload {
   hash: string;
 }
 
-const getClient = () => new TelegramClient(
-  new StringSession(LocalStorageService.get<string>(storageKeys.SessionId) || ''),
-  parseInt(LocalStorageService.get<string>(storageKeys.ApiId) || '0', 10) || 10000000,
-  LocalStorageService.get<string>(storageKeys.ApiHash) || '111eb4dc492d4ae475d575c00bf0aa11',
-  {},
+const getClient = (withInitialState: boolean = false) => (withInitialState
+  ? initialTelegramClient
+  : new TelegramClient(
+    new StringSession(LocalStorageService.get<string>(storageKeys.SessionId) || ''),
+    parseInt(LocalStorageService.get<string>(storageKeys.ApiId) || '0', 10) || initialApiId,
+    LocalStorageService.get<string>(storageKeys.ApiHash) || initialApiHash,
+    {},
+  )
 );
 
 const initialState: ClientSliceState = {
@@ -65,7 +69,7 @@ export const clientSlice = createAppSlice({
     }),
     resetClient: create.reducer((state) => ({
       ...state,
-      client: getClient(),
+      client: getClient(true),
     })),
     setIsAuth: create.reducer((state, action: PayloadAction<boolean>) => ({
       ...state,
